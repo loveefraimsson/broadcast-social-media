@@ -1,7 +1,25 @@
-﻿@model UsersShowUserViewModel
+﻿@using Microsoft.AspNetCore.Identity
+@model UsersShowUserViewModel
+
+@* Get the logged in user *@
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    //Shows in browser
+    ViewData["Title"] = Model.User.Name;
+}
 
 <section>
     <h1>Broadcasts from @Model.User.Name</h1>
+
+    @if(user.Id!= Model.User.Id)
+    {
+        <form action="/Users/Listen" method="post">
+            <input type="hidden" name="UserId" value="@Model.User.Id" />
+            <input type="submit" value="Listen to" />
+        </form>
+    }
 
     @foreach (var broadcast in Model.Broadcasts)
     {

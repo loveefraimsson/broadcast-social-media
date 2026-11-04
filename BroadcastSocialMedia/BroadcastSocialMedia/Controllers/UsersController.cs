@@ -33,10 +33,12 @@ namespace BroadcastSocialMedia.Controllers
         [Route("/Users/{id}")]
         public async Task<IActionResult> ShowUser(string id)
         {
+            //Get all broadcasts from the clicked user. Compare incomming id with the id of the user in database
             var broadcasts = await _dbContext.Broadcasts.Where(b => b.User.Id == id)
                 .OrderByDescending(b => b.Published)
                 .ToListAsync();
-            var user = await _userManager.GetUserAsync(User);
+            //Clicked user
+            var user = await _dbContext.Users.Where(u => u.Id == id).FirstOrDefaultAsync();
 
             var viewModel = new UsersShowUserViewModel()
             {
@@ -45,6 +47,23 @@ namespace BroadcastSocialMedia.Controllers
             };
 
             return View(viewModel);
+        }
+
+
+        [HttpPost, Route("/Users/Listen")]
+        public async Task<IActionResult> ListenToUser(UsersListenToUserViewModel viewModel)
+        {
+            var loggedInUser = await _userManager.GetUserAsync(User);
+            var userToListenTo = await _dbContext.Users.Where(u => u.Id == viewModel.UserId)
+                .FirstOrDefaultAsync();
+
+            loggedInUser.ListeningTo.Add(userToListenTo);
+
+            //Saves changes in database
+            await _userManager.UpdateAsync(loggedInUser);
+            await _dbContext.SaveChangesAsync();
+
+            return Redirect("/");
         }
     }
 }

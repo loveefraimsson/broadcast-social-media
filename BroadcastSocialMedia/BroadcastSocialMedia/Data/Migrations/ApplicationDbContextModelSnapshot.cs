@@ -30,6 +30,9 @@ namespace BroadcastSocialMedia.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -78,6 +81,8 @@ namespace BroadcastSocialMedia.Data.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -252,6 +257,13 @@ namespace BroadcastSocialMedia.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BroadcastSocialMedia.Models.ApplicationUser", b =>
+                {
+                    b.HasOne("BroadcastSocialMedia.Models.ApplicationUser", null)
+                        .WithMany("ListeningTo")
+                        .HasForeignKey("ApplicationUserId");
+                });
+
             modelBuilder.Entity("BroadcastSocialMedia.Models.Broadcast", b =>
                 {
                     b.HasOne("BroadcastSocialMedia.Models.ApplicationUser", "User")
@@ -315,6 +327,8 @@ namespace BroadcastSocialMedia.Data.Migrations
             modelBuilder.Entity("BroadcastSocialMedia.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Broadcasts");
+
+                    b.Navigation("ListeningTo");
                 });
 #pragma warning restore 612, 618
         }
