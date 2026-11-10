@@ -1,3 +1,4 @@
+using AspNetCoreGeneratedDocument;
 using BroadcastSocialMedia.Data;
 using BroadcastSocialMedia.Models;
 using BroadcastSocialMedia.ViewModels;
@@ -26,14 +27,30 @@ namespace BroadcastSocialMedia.Controllers
         {
             //Logged in user
             var user = await _userManager.GetUserAsync(User);
-            //Get the logged in user from database
+
+            // Not logged in: show login page
+            if (user == null)
+            {
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
+            }
+
+
+            //Get all broadcasts that the logged-in user is listening to and the logged in user
             var dbUser = await _dbContext.Users.Where(u => u.Id == user.Id).FirstOrDefaultAsync();
 
-            var listeningTo = await _dbContext.Users.Where(u => u.Id == user.Id)
+            var broadcasts = await _dbContext.Users.Where(u => u.Id == user.Id)
                 .SelectMany(u => u.ListeningTo)
+                .SelectMany(u => u.Broadcasts)
+                .Include(b => b.User)
+                .OrderByDescending(b => b.Published)
                 .ToListAsync();
 
-            return View();
+            var viewModel = new HomeIndexViewModel()
+            {
+                Broadcasts = broadcasts
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult Privacy()
