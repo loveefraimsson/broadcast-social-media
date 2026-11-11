@@ -7,5 +7,6 @@ namespace BroadcastSocialMedia.ViewModels
         //Clicked user
         public ApplicationUser User { get; set; }
         public List<Broadcast> Broadcasts { get; set; }
+        public bool IsListening { get; set; }
     }
 }

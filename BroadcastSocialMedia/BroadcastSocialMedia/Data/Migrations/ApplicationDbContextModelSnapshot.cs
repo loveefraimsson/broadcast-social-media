@@ -22,6 +22,21 @@ namespace BroadcastSocialMedia.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationUserApplicationUser", b =>
+                {
+                    b.Property<string>("ListenersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ListeningToId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ListenersId", "ListeningToId");
+
+                    b.HasIndex("ListeningToId");
+
+                    b.ToTable("UserListeners", (string)null);
+                });
+
             modelBuilder.Entity("BroadcastSocialMedia.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -29,9 +44,6 @@ namespace BroadcastSocialMedia.Data.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
-
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -81,8 +93,6 @@ namespace BroadcastSocialMedia.Data.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -257,11 +267,19 @@ namespace BroadcastSocialMedia.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BroadcastSocialMedia.Models.ApplicationUser", b =>
+            modelBuilder.Entity("ApplicationUserApplicationUser", b =>
                 {
                     b.HasOne("BroadcastSocialMedia.Models.ApplicationUser", null)
-                        .WithMany("ListeningTo")
-                        .HasForeignKey("ApplicationUserId");
+                        .WithMany()
+                        .HasForeignKey("ListenersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BroadcastSocialMedia.Models.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ListeningToId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BroadcastSocialMedia.Models.Broadcast", b =>
@@ -327,8 +345,6 @@ namespace BroadcastSocialMedia.Data.Migrations
             modelBuilder.Entity("BroadcastSocialMedia.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Broadcasts");
-
-                    b.Navigation("ListeningTo");
                 });
 #pragma warning restore 612, 618
         }

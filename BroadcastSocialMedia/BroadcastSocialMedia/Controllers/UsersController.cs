@@ -53,14 +53,35 @@ namespace BroadcastSocialMedia.Controllers
         [HttpPost, Route("/Users/Listen")]
         public async Task<IActionResult> ListenToUser(UsersListenToUserViewModel viewModel)
         {
-            var loggedInUser = await _userManager.GetUserAsync(User);
-            var userToListenTo = await _dbContext.Users.Where(u => u.Id == viewModel.UserId)
-                .FirstOrDefaultAsync();
+            var loggedInUserId = _userManager.GetUserId(User);
 
-            loggedInUser.ListeningTo.Add(userToListenTo);
+            var loggedInUser = await _dbContext.Users
+                .Include(u => u.ListeningTo)
+                .FirstOrDefaultAsync(u => u.Id == loggedInUserId);
 
-            //Saves changes in database
-            await _userManager.UpdateAsync(loggedInUser);
+            var userToListenTo = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.Id == viewModel.UserId);
+
+            if (loggedInUser == null || userToListenTo == null)
+                return NotFound();
+
+            // The user cannot listen to themselves
+            if (loggedInUser.Id == userToListenTo.Id)
+                return Redirect("/");
+
+            //Find the user in the list
+            var alreadyListening = loggedInUser.ListeningTo
+                .FirstOrDefault(u => u.Id == userToListenTo.Id);
+
+            if (alreadyListening == null)
+            {
+                loggedInUser.ListeningTo.Add(userToListenTo);
+            }
+            else
+            {
+                loggedInUser.ListeningTo.Remove(alreadyListening);
+            }
+
             await _dbContext.SaveChangesAsync();
 
             return Redirect("/");
