@@ -4,6 +4,7 @@ using BroadcastSocialMedia.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace BroadcastSocialMedia.Controllers
 {
@@ -26,6 +27,8 @@ namespace BroadcastSocialMedia.Controllers
                 viewModel.Result = users;
             }
 
+            
+
             return View(viewModel);
         }
 
@@ -37,13 +40,22 @@ namespace BroadcastSocialMedia.Controllers
             var broadcasts = await _dbContext.Broadcasts.Where(b => b.User.Id == id)
                 .OrderByDescending(b => b.Published)
                 .ToListAsync();
+
             //Clicked user
             var user = await _dbContext.Users.Where(u => u.Id == id).FirstOrDefaultAsync();
+
+            var isListening = await _dbContext.Users
+                .Where(u => u.Id == _userManager.GetUserId(User))
+                .SelectMany(u => u.ListeningTo)
+                .AnyAsync(u => u.Id == id); // id = The clicked users id
+
+
 
             var viewModel = new UsersShowUserViewModel()
             {
                 Broadcasts = broadcasts,
-                User = user
+                User = user,
+                IsListening = isListening
             };
 
             return View(viewModel);

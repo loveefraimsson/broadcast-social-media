@@ -1,10 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @model UsersShowUserViewModel
 
-@* Get the logged in user *@
 @inject UserManager<ApplicationUser> UserManager
 
 @{
+    //Get the logged in user 
     var user = await UserManager.GetUserAsync(User);
     //Shows in browser
     ViewData["Title"] = Model.User.Name;
@@ -17,7 +17,7 @@
     {
         <form action="/Users/Listen" method="post">
             <input type="hidden" name="UserId" value="@Model.User.Id" />
-            <input type="submit" value="Listen to" />
+            <input type="submit" value="@(Model.IsListening ? "Stop listening" : "Listen to")" />
         </form>
     }
 
